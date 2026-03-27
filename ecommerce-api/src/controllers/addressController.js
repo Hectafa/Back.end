@@ -17,9 +17,9 @@ const getUserAddresses = async (req, res) => {
     }
 };
 
-const getAdressById = async (req, res) => {
+const getAddressById = async (req, res) => {
     try {
-        const addressId = req.params;
+        const addressId = req.params.id;
         const userId = req.user.userId;
 
         const address = await Address.findOne({ _id: addressId, user: userId });
@@ -118,4 +118,4 @@ const deleteAddress = async (req, res, next) => {
 };
 
 
-export { getUserAddresses, getAdressById, createAddress, updateAddress, deleteAddress };
+export { getUserAddresses, getAddressById, createAddress, updateAddress, deleteAddress };

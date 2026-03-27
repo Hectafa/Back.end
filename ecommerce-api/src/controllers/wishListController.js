@@ -59,6 +59,6 @@ async function createWishList(req, res) {
         const newWishList = await WishList.create({ user, products });
         res.status(201).json(newWishList);
     } catch (error) {
-        console.error(error); 
+        console.error(error);
     }
 }
