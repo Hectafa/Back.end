@@ -53,3 +53,30 @@ const registre = async (req, res, next) => {
         next(error);
     }
 };
+
+const login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        const userExist = await checkUserExist(email);
+        if (!userExist) {
+            return res.status(400).json({ message: 'User doesnt exist. You must sign in first' });
+        }
+
+        const isMatch = await bcrypt.compare(password, userExist.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid password' });
+        };
+
+        const token = generateToken(
+            userExist._id,
+            userExist.displayName,
+            userExist.role
+        );
+        const refreshToken = generateRefreshToken(userExist._id);
+
+        res.status(200).json({ token, refreshToken: refreshToken.token });
+    } catch (error) {
+        next(error);
+    }
+};
