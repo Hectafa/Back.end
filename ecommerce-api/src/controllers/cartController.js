@@ -1,18 +1,21 @@
 import express from "express";
 import Cart from "../models/Cart.js";
 
-async function getCarts(req, res) {
+// Solo Admins
+async function getCarts(req, res, next) {
     try {
         const carts = await Cart.find()
-            .populate("user")
-            .populate("products.product");
+            .populate('user')
+            .populate('products.product');
         res.json(carts);
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 }
 
-async function getCartById(req, res) {
+// Cualquier usuario
+
+async function getCartById(req, res, next) {
     try {
         const id = req.params.id;
         const cart = await Cart.findById(id)
@@ -23,11 +26,11 @@ async function getCartById(req, res) {
         }
         res.json(cart);
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 }
 
-async function getCartByUser(req, res) {
+async function getCartByUser(req, res, next) {
     try {
         const userId = req.params.id;
         const cart = await Cart.findOne({ user: userId })
@@ -38,11 +41,11 @@ async function getCartByUser(req, res) {
         }
         res.json(cart);
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 }
 
-async function createCart(req, res) {
+async function createCart(req, res, next) {
     try {
         const { user, products } = req.body;
 
@@ -68,11 +71,11 @@ async function createCart(req, res) {
         res.status(201).json(newCart);
 
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 }
 
-async function updateCart(req, res) {
+async function updateCart(req, res, next) {
     try {
         const { id } = req.params;
         const { user, products } = req.body;
@@ -102,7 +105,7 @@ async function updateCart(req, res) {
         }
 
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 }
 
@@ -117,8 +120,40 @@ async function deleteCart(req, res) {
             return res.status(400).json({ error: "Cart not found" });
         }
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 }
 
-export { getCarts, getCartById, getCartByUser, createCart, updateCart, deleteCart };
+async function addProductCart(req, res, next) {
+    try {
+        const { userId, productId, quantity = 1 } = req.body;
+        let cart = await Cart.findOne({ user: userId });
+
+        if(!cart) {
+            cart = newCart({ 
+                user: userId,
+                products: [{ product: productId, quantity }],
+            });
+        } else {
+            const existingProductIndex = cart.products.findIndex(
+                (item) => item.product.toString() === productId,
+            );
+
+            if(existingProductIndex) >= 0 {
+                cart.products[existingProductIndex].quantity += quantity;
+            }else{
+                cart.products.push({ product: productId, quantity });
+            }
+        }
+
+        await cart.save();
+        await cart.populate(save);
+        await cart.populate('products.product');
+
+        res.json(cart);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export { getCarts, getCartById, getCartByUser, createCart, updateCart, deleteCart, addProductCart };

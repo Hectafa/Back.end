@@ -13,7 +13,7 @@ const getUserAddresses = async (req, res) => {
 
         res.status(200).json({ addresses });
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 };
 
@@ -29,7 +29,7 @@ const getAddressById = async (req, res) => {
 
         res.status(200).json({ address });
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 };
 
@@ -39,7 +39,7 @@ const createAddress = async (req, res) => {
         const userId = req.user.userId;
 
         if (isDefault) {
-            await Address.updateMany({ user }, { isDefault: false });
+            await Address.updateMany({ userId }, { isDefault: false });
         }
 
         const newAddress = new Address({
@@ -59,7 +59,7 @@ const createAddress = async (req, res) => {
         res.status(201).json({ newAddress });
 
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 };
 
@@ -78,7 +78,7 @@ const updateAddress = async (req, res) => {
             addressType
         } = req.body;
 
-        const user = req.user.userId;
+        const userId = req.user.userId;
 
         const shipAddress = await Address.findOne({ _id: addressId, user: userId });
 
@@ -105,15 +105,29 @@ const updateAddress = async (req, res) => {
 
 
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 };
 
 const deleteAddress = async (req, res, next) => {
     try {
-        const addressId = req.params;
+        const { addressId } = req.params;
+        const userId = req.user.userId;
+
+        const shipAddress = await Address.findOne({
+            _id: addressId,
+            user: userId,
+        });
+
+        if (!shipAddress) {
+            return res.status(404).json({ messagge: 'Address not found' });
+        }
+
+        await Address.findByIdAndDelete(addressId);
+        res.status(200).json({ messagge: 'Address delete successfully' });
+
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 };
 
