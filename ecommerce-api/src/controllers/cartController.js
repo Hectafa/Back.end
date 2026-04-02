@@ -129,8 +129,8 @@ async function addProductCart(req, res, next) {
         const { userId, productId, quantity = 1 } = req.body;
         let cart = await Cart.findOne({ user: userId });
 
-        if(!cart) {
-            cart = newCart({ 
+        if (!cart) {
+            cart = newCart({
                 user: userId,
                 products: [{ product: productId, quantity }],
             });
@@ -139,9 +139,9 @@ async function addProductCart(req, res, next) {
                 (item) => item.product.toString() === productId,
             );
 
-            if(existingProductIndex) >= 0 {
+            if (existingProductIndex) >= 0 {
                 cart.products[existingProductIndex].quantity += quantity;
-            }else{
+            }else {
                 cart.products.push({ product: productId, quantity });
             }
         }
