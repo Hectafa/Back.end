@@ -1,7 +1,7 @@
 import express from 'express';
 import Address from '../models/Address.js';
 
-const getUserAddresses = async (req, res) => {
+const getUserAddresses = async (req, res, next) => {
     try {
         const userId = req.user.userId;
 
