@@ -5,8 +5,10 @@ import routes from "./src/routes/index.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import logger from "./src/middlewares/logger.js";
 
+dotenv.config();
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(logger);
@@ -19,7 +21,17 @@ app.get("/", (req, res) => {
 });
 
 
+
+
 app.use('/api', routes);
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+    method: req.method,
+    url: req.originalUrl,
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

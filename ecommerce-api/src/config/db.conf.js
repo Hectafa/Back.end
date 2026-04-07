@@ -1,9 +1,13 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose";}
+import dotenv from "dotenv";
+
+
+dotenv.config();
 
 const connectDB = async () => {
     try {
         const connection = await mongoose.connect(
-            "mongodb://localhost:27017/ecommerce-db-test",
+            process.env.MONGODB_URI || "mongodb://localhost:27017/ecommerce-db",
         );
         console.log(`MongoDB connected ${connection.connection.host}`);
     } catch (error) {
