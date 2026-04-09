@@ -1,5 +1,5 @@
 import express from 'express';
-import { param } from 'express-validator';
+import { body, param } from 'express-validator';
 import {
     getCarts,
     getCartByUser,
@@ -9,6 +9,8 @@ import {
     deleteCart
 } from '../controllers/cartController.js';
 import validate from '../middlewares/validation.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+import isAdmin from '../middlewares/isAdminMiddleware.js';
 
 const router = express.Router();
 
@@ -22,6 +24,24 @@ const userIdValidation = [
     param('id')
         .isMongoId()
         .withMessage('User Id must be a valid mongoDB object Id'),
+];
+
+const createCartValidation = [
+    body('user')
+        .notEmpty()
+        .withMessage('User is required')
+        .isMongoId()
+        .withMessage('User must be a valid mongoDB object Id'),
+    body('products')
+        .optional()
+        .isArray()
+        .withMessage('Products must be an array'),
+    body('products.*.product')
+        .isMongoId()
+        .withMessage('Each product Id must be a valid mongoDB object Id'),
+    body('products.*.quantity')
+        .isInt({ min: 1 })
+        .withMessage('Each product quantity must be an integer greater than 0'),
 ];
 
 const putCartValidation = [
@@ -50,22 +70,48 @@ const putCartValidation = [
         .withMessage('Each product quantity must be an integer greater than 0'),
 ];
 
-//Get all carts
-router.get('/cart', getCarts);
 
-//Get cart by id
-router.get('/cart/:id', cartIdValidation, validate, getCartById);
+router.get('/cart', authMiddleware, isAdmin, getCarts);
 
-//Get cart by user
-router.get('/cart/user/:id', userIdValidation, validate, getCartByUser);
+router.get(
+    '/cart/:id',
+    authMiddleware,
+    isAdmin,
+    cartIdValidation,
+    validate,
+    getCartById
+);
 
-//Create cart
-router.post('/cart', createCart);
+router.get(
+    '/cart/user/:id',
+    authMiddleware,
+    userIdValidation,
+    validate,
+    getCartByUser
+);
 
-//Update cart
-router.put('/cart/:id', updateCart);
+router.post(
+    '/cart',
+    authMiddleware,
+    createCartValidation,
+    validate,
+    createCart
+);
 
-//Delete cart
-router.delete('/cart/:id', cartIdValidation, validate, deleteCart);
+router.put(
+    '/cart/:id',
+    authMiddleware,
+    putCartValidation,
+    validate,
+    updateCart
+);
+
+router.delete(
+    '/cart/:id',
+    authMiddleware,
+    cartIdValidation,
+    validate,
+    deleteCart
+);
 
 export default router;
