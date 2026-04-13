@@ -47,7 +47,7 @@ const createOrderValidation = [
     body('address')
         .notEmpty()
         .withMessage('Address is required')
-        isMongoId()
+        .isMongoId()
         .withMessage('Address must be a valid mongoDB object Id'),
     body('paymentMethod')
         .notEmpty()

@@ -139,7 +139,7 @@ async function addProductCart(req, res, next) {
                 (item) => item.product.toString() === productId,
             );
 
-            if (existingProductIndex) >= 0 {
+            if (existingProductIndex >= 0) {
                 cart.products[existingProductIndex].quantity += quantity;
             }else {
                 cart.products.push({ product: productId, quantity });

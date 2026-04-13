@@ -80,3 +80,5 @@ const login = async (req, res, next) => {
         next(error);
     }
 };
+
+export { registre, login, generateToken, generateRefreshToken };
